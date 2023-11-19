@@ -124,38 +124,18 @@ def is_valid_state(env: Env, n: int):
 
 def test_is_valid_state():
     #テストコード, 本番には関係ない
-    left = [(1,1),(1,1),(1,1)]
-    right = [(0,0),(0,0),(0,0)]
-    test_state = Env.set_state(3, left, right, 0)
-    assert is_valid_state(test_state, 3) == True
-    left1 = [(1,1),(0,1),(1,1)]
-    right1 = [(0,0),(1,0),(0,0)]
-    test_state1 = Env.set_state(3, left1, right1, 0)
-    assert is_valid_state(test_state1, 3) == False
-    left2 = [(1,1),(0,0),(1,1)]
-    right2 = [(0,0),(1,1),(0,0)]
-    test_state2 = Env.set_state(3, left2, right2, 0)
-    assert is_valid_state(test_state2, 3) == True
-
-def test_is_next_state():
-    #テストコード, 本番には関係ない
     left = [[1,1],[1,1],[1,1]]
     right = [[0,0],[0,0],[0,0]]
     test_state = Env.set_state(3, left, right, 0)
-    left = [[1,0],[1,1],[1,1]]
-    right = [[0,1],[0,0],[0,0]]
-    visit_state = Env.set_state(3, left, right, 1)
-    visited = [visit_state]
-    test_state.next_states([], n = 3)
-
-    left = [[0,1],[1,1],[1,1]]
-    right = [[1,0],[0,0],[0,0]]
-    test_state = Env.set_state(3, left, right, 1) #次は右から左へ
-    left = [[1,0],[1,1],[1,1]]
-    right = [[0,1],[0,0],[0,0]]
-    visit_state = Env.set_state(3, left, right, 0)
-    visited = [visit_state]
-    test_state.next_states([], n = 3)
+    assert is_valid_state(test_state, 3) == True
+    left1 = [[1,1],[0,1],[1,1]]
+    right1 = [[0,0],[1,0],[0,0]]
+    test_state1 = Env.set_state(3, left1, right1, 0)
+    assert is_valid_state(test_state1, 3) == False
+    left2 = [[1,1],[0,0],[1,1]]
+    right2 = [[0,0],[1,1],[0,0]]
+    test_state2 = Env.set_state(3, left2, right2, 0)
+    assert is_valid_state(test_state2, 3) == True
 
 def dfs(n = N):
     state = Env(n)
