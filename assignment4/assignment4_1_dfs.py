@@ -124,16 +124,16 @@ def is_valid_state(env: Env, n: int):
 
 def test_is_valid_state():
     #テストコード, 本番には関係ない
-    left = [(1,1),(1,1),(1,1)]
-    right = [(0,0),(0,0),(0,0)]
+    left = [[1,1],[1,1],[1,1]]
+    right = [[0,0],[0,0],[0,0]]
     test_state = Env.set_state(3, left, right, 0)
     assert is_valid_state(test_state, 3) == True
-    left1 = [(1,1),(0,1),(1,1)]
-    right1 = [(0,0),(1,0),(0,0)]
+    left1 = [[1,1],[0,1],[1,1]]
+    right1 = [[0,0],[1,0],[0,0]]
     test_state1 = Env.set_state(3, left1, right1, 0)
     assert is_valid_state(test_state1, 3) == False
-    left2 = [(1,1),(0,0),(1,1)]
-    right2 = [(0,0),(1,1),(0,0)]
+    left2 = [[1,1],[0,0],[1,1]]
+    right2 = [[0,0],[1,1],[0,0]]
     test_state2 = Env.set_state(3, left2, right2, 0)
     assert is_valid_state(test_state2, 3) == True
 
