@@ -164,7 +164,7 @@ def dfs(n = N):
         node = states.pop() #DFSなのでpop, nodeはenv　class
         for src, dst in moves:
             next_states = node.next_states(visited, n, src = src, dst = dst)
-            #print(next_states)
+            print(next_states)
             for state in next_states:
                 if state == finish_state:
                     return node_counter
