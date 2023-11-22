@@ -30,9 +30,9 @@ from tqdm import tqdm
 
 def make_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--generation", "-g", type = int, default=50,)
+    parser.add_argument("--generation", "-g", type = int, default=100,)
     parser.add_argument("--path", "-p", type = str, default="input1.txt")
-    parser.add_argument("--num_entity", "-n", type = int, default=100)
+    parser.add_argument("--num_entity", "-n", type = int, default=50)
     args = parser.parse_args()
     return args
 
