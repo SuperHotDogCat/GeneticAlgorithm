@@ -17,24 +17,26 @@ Wikipediaの実装例に従って実装を行う。
 選択確率: 94%, 交叉確率: 5%, 突然変異:1%
 
 この問題では3種類のGAを比較するのが目的なので、同じ選択法・個体数を使用して成績を比較する
-選択法: トーナメント法(10個取り出す)
-個体数: 100とする
+選択法: トーナメント法(50個取り出す)
+個体数: 1000とする
 世代数: 1000
 """
 import argparse 
 import copy
 import numpy as np
 from typing import List
+import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 def make_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--generation", "-g", type = int, default=100,)
+    parser.add_argument("--generation", "-g", type = int, default=1000,)
     parser.add_argument("--path", "-p", type = str, default="input1.txt")
-    parser.add_argument("--num_entity", "-n", type = int, default=100)
+    parser.add_argument("--num_entity", "-n", type = int, default=1000)
     args = parser.parse_args()
     return args
 
-def selection(entities: List[List[int]], scores: List[int], num_entity: int, selection_n: int = 10):
+def selection(entities: List[List[int]], scores: List[int], num_entity: int, selection_n: int = 50):
     selected_indices = np.random.randint(0, num_entity, selection_n)
     selected_scores = np.array(scores)[selected_indices]
     selected_idx = np.argmax(selected_scores)
@@ -125,8 +127,10 @@ if __name__ == "__main__":
     #この世代のscoreを計算する
     for idx, entity in enumerate(entities):
         scores[idx] = calc_score(entity, ways)
-
-    for generation in range(args.generation):
+    
+    print(np.max(scores))
+    results = []
+    for generation in tqdm(range(args.generation)):
         #generation回だけ世代を更新する
         
         #選択, 交叉, 突然変異を行い、新しい世代を作る
@@ -150,5 +154,12 @@ if __name__ == "__main__":
         #この世代のscoreを計算する
         for idx, entity in enumerate(entities):
             scores[idx] = calc_score(entity, ways)
+        results.append([generation + 1, np.min(scores), np.max(scores), np.mean(scores)])
+    results = np.array(results)
+    plt.plot(results[:,0], results[:,1])
+    plt.plot(results[:,0], results[:,2])
+    plt.plot(results[:,0], results[:,3])
+    plt.legend(["min", "max", "mean"])
+    plt.savefig("darwin.png")
     print(np.max(scores))
     
