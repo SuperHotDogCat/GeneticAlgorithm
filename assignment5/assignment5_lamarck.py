@@ -20,6 +20,8 @@ Wikipediaの実装例に従って実装を行う。
 選択法: トーナメント法(5個取り出す)
 個体数: 50とする
 世代数: 100
+
+baldwinはスコアの計算方法を変えることが本質, 山登り法でスコアを計算すること
 """
 import argparse 
 import copy
@@ -30,9 +32,9 @@ from tqdm import tqdm
 
 def make_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--generation", "-g", type = int, default=50,)
+    parser.add_argument("--generation", "-g", type = int, default=100,)
     parser.add_argument("--path", "-p", type = str, default="input1.txt")
-    parser.add_argument("--num_entity", "-n", type = int, default=100)
+    parser.add_argument("--num_entity", "-n", type = int, default=50)
     args = parser.parse_args()
     return args
 
@@ -90,6 +92,25 @@ def calc_score(entity, ways, doprint = False):
         score += X_s.count(0)
     return score
 
+def climbing_score(entity, ways, T: int):
+    """
+    山登り法でスコアを計算する, 1回indexを入れ替えた状態での最適値を求める
+    waysは1始まりindexであることに注意
+    Tは作業数
+    """
+    max_score = calc_score(entity, ways)
+    max_entity = entity
+    for i in range(T-1):
+        for j in range(i+1, T):
+            new_entity = copy.copy(entity)
+            new_entity[i], new_entity[j] = new_entity[j], new_entity[i]
+            new_score = calc_score(new_entity, ways)
+            if new_score > max_score:
+                max_score = new_score
+                max_entity = new_entity
+    return max_score, max_entity
+
+
 def translate_entity(entity):
     for symbol in entity:
         if symbol == 1:
@@ -126,8 +147,9 @@ if __name__ == "__main__":
 
     scores = [0] * args.num_entity
     #この世代のscoreを計算する
-    for idx, entity in enumerate(entities):
-        scores[idx] = calc_score(entity, ways)
+    for idx, entity in tqdm(enumerate(entities)):
+        #scores[idx] = calc_score(entity, ways)
+        scores[idx], entities[idx] = climbing_score(entity, ways, T)
     
     print(np.max(scores))
     results = []
@@ -154,13 +176,14 @@ if __name__ == "__main__":
         scores = [0] * len(entities)
         #この世代のscoreを計算する
         for idx, entity in enumerate(entities):
-            scores[idx] = calc_score(entity, ways)
+            #scores[idx] = calc_score(entity, ways)
+            scores[idx], entities[idx] = climbing_score(entity, ways, T)
         results.append([generation + 1, np.min(scores), np.max(scores), np.mean(scores)])
     results = np.array(results)
     plt.plot(results[:,0], results[:,1])
     plt.plot(results[:,0], results[:,2])
     plt.plot(results[:,0], results[:,3])
     plt.legend(["min", "max", "mean"])
-    plt.savefig("darwin.png")
+    plt.savefig("lamarck.png")
     print(np.max(scores))
     
