@@ -5,7 +5,7 @@
 
 選択法: トーナメント法(3個取り出す)
 個体数: 50とする
-世代数: 100
+世代数: 15
 """
 
 import argparse 
@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 def make_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--generation", "-g", type = int, default=100,)
+    parser.add_argument("--generation", "-g", type = int, default=15,)
     parser.add_argument("--path", "-p", type = str, default=None)
     parser.add_argument("--num_entity", "-n", type = int, default=50)
     args = parser.parse_args()
@@ -91,6 +91,24 @@ def calc_score(entity, doprint = False):
                 #x座標はマイナスをかけて等しくて, y座標は等しいなら左右対称
                 score += 1
     return score
+
+def climbing_score(entity):
+    """
+    山登り法でスコアを計算する, 1回indexを入れ替えた状態での最適値を求める
+    """
+    max_score = calc_score(entity)
+    max_entity = entity
+    T = 2 * 6 * 23
+    for i in range(T-1):
+        for j in range(i+1, T):
+            new_entity = copy.copy(entity)
+            new_entity = new_entity[:i] + entity[j] + entity[i+1:j] + entity[i] + entity[j+1:]
+            new_score = calc_score(new_entity)
+            if new_score > max_score:
+                max_score = new_score
+                max_entity = new_entity
+    return max_score, max_entity
+
 
 """
 entity str型: 101...の並び
@@ -190,7 +208,7 @@ def main():
     #この世代のscoreを計算する
     for idx, entity in tqdm(enumerate(entities)):
         #scores[idx] = calc_score(entity, ways)
-        scores[idx] = calc_score(entity)
+        scores[idx], entities[idx] = climbing_score(entity)
     
     results = []
     T = 2 * 6 * 23 #遺伝子長(entityの長さ)
@@ -218,14 +236,14 @@ def main():
         #この世代のscoreを計算する
         for idx, entity in enumerate(entities):
             #scores[idx] = calc_score(entity, ways)
-            scores[idx] = calc_score(entity)
+            scores[idx], entities[idx] = climbing_score(entity)
         results.append([generation + 1, np.min(scores), np.max(scores), np.mean(scores)])
     results = np.array(results)
     plt.plot(results[:,0], results[:,1])
     plt.plot(results[:,0], results[:,2])
     plt.plot(results[:,0], results[:,3])
     plt.legend(["min", "max", "mean"])
-    plt.savefig("points_score.png")
+    plt.savefig("points_score_lamarck.png")
     plt.close()
     print(np.max(scores))
     scores = np.array(scores)
@@ -245,5 +263,5 @@ if __name__ == "__main__":
         plt.xlim(-32, 32)
         plt.ylim(-32, 32)
         plt.scatter(points[:,0], points[:,1])
-        plt.savefig(f"points{idx}.png")
+        plt.savefig(f"points{idx}_lamarck.png")
         plt.close()
