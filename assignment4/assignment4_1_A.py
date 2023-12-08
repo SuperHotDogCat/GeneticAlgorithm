@@ -200,3 +200,12 @@ if __name__ == "__main__":
     print(Astar(4))
     print(Astar(5))
     print(Astar(6))
+
+"""Result
+1: 1
+2: 19
+3: 55
+4: -1
+5: -1
+6: -1
+"""

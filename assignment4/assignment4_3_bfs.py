@@ -179,5 +179,14 @@ if __name__ == "__main__":
     print(dfs(2))
     print(dfs(3))
     print(dfs(4))
-    #print(dfs(5)) N = 5でもう厳しい
-    #print(dfs(6)) N = 6は厳しかった
+    print(dfs(5)) #N = 5でもう厳しい
+    print(dfs(6)) #N = 6は厳しかった
+
+"""Result
+1: 5
+2: 82
+3: 547
+4: 2729
+5: 11899
+6: 測定不能
+"""

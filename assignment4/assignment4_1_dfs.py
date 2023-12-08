@@ -165,3 +165,12 @@ if __name__ == "__main__":
     print(dfs(4))
     print(dfs(5))
     print(dfs(6))
+
+"""Result
+1: 1
+2: 16
+3: 53
+4: -1
+5: -1
+6: -1
+"""

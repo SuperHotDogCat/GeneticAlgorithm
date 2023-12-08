@@ -209,5 +209,14 @@ if __name__ == "__main__":
     print(Astar(2))
     print(Astar(3))
     print(Astar(4))
-    #print(dfs(5)) N = 5でもう厳しい
-    #print(dfs(6)) N = 6は厳しかった
+    print(Astar(5)) #N = 5でもう厳しい
+    print(Astar(6)) #N = 6は厳しかった
+
+"""Result
+1: 8
+2: 60
+3: 325
+4: 1182
+5: 2928
+6: 10050
+"""
