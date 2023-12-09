@@ -213,6 +213,7 @@ if __name__ == "__main__":
     print(Astar(6)) 
 
 """Result
+N: num_nodes
 1: 5
 2: 45
 3: 316

@@ -167,6 +167,7 @@ if __name__ == "__main__":
     print(dfs(6))
 
 """Result
+N: num_nodes
 1: 1
 2: 20
 3: 55

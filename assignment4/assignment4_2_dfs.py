@@ -183,6 +183,7 @@ if __name__ == "__main__":
     #print(dfs(6)) #N = 6は厳しかった
 
 """Result
+N: num_nodes
 1: 7
 2: 76
 3: 376
