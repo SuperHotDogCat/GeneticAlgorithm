@@ -2,6 +2,7 @@
 対話型進化計算を実行することとした。
 好き嫌いで1か0点
 左右対称な点が1組あるごとに点数を1点加算
+選択90% 交叉8% 突然変異2%
 
 選択法: トーナメント法(3個取り出す)
 個体数: 50とする
@@ -14,6 +15,7 @@ import numpy as np
 from typing import List
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import pickle
 
 def make_args():
     parser = argparse.ArgumentParser()
@@ -85,11 +87,19 @@ def calc_score(entity, doprint = False):
     """
     points: List[List[int]] = toPoints(entity)
     score = 0
+    seen = []
     for i in range(23-1):
         for j in range(i+1, 23):
-            if points[i][0] == -points[j][0] and points[i][1] == points[j][1]:
+            if (points[i][0] == -points[j][0] and points[i][1] == points[j][1]) and (not points[i] in seen) and (not points[j] in seen):
                 #x座標はマイナスをかけて等しくて, y座標は等しいなら左右対称
                 score += 1
+                seen.append(points[i])
+                seen.append(points[j])
+    alpha = 1 / 20 / 20
+    for i in range(23-1):
+        for j in range(i+1, 23):
+            L2 = ((points[i][0] - points[j][0]) ** 2 + (points[i][1] - points[j][1]) ** 2)**(1/2)
+            score -= ((20 - L2) ** 2)**(1/2) * alpha 
     return score
 
 def climbing_score(entity):
@@ -203,7 +213,10 @@ def main():
     mainの実行をする
     """
     args = make_args()
-    entities = create_first_gen(args.num_entity) #entities 生成
+    if args.path == None:
+        entities = create_first_gen(args.num_entity) #entities 生成
+    else:
+        entities = pickle.load(open(args.path, "rb"))
     scores = [0] * args.num_entity
     #この世代のscoreを計算する
     for idx, entity in tqdm(enumerate(entities)):
@@ -219,10 +232,10 @@ def main():
         new_entities = []
         while len(new_entities) < args.num_entity:
             p = np.random.rand() #probability
-            if p < 0.94:
+            if p < 0.90:
                 new_entity = selection(entities, scores, args.num_entity, 3)
                 new_entities.append(new_entity)
-            elif 0.94 <= p < 0.99:
+            elif 0.90 <= p < 0.98:
                 new_entity1, new_entity2 = exe_crossover(entities, args.num_entity, 2 * 6 * 23)
                 new_entities.append(new_entity1)
                 new_entities.append(new_entity2)
@@ -252,6 +265,8 @@ def main():
     max_entities = []
     for max_idx in max_indices:
         max_entities.append(entities[max_idx])
+    with open("entities_lamarck.bin", "wb") as f:
+        pickle.dump(entities, f)
     return max_entities
 
 if __name__ == "__main__":
