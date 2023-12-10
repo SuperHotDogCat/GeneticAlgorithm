@@ -180,7 +180,7 @@ if __name__ == "__main__":
     print(dfs(3))
     print(dfs(4))
     print(dfs(5))
-    #print(dfs(6)) #N = 6は厳しかった
+    print(dfs(6)) #N = 6は厳しかった
 
 """Result
 N: num_nodes
@@ -189,5 +189,5 @@ N: num_nodes
 3: 376
 4: 2176
 5: 1665
-6: 計測不能
+6: 24225
 """

@@ -173,7 +173,7 @@ def calc_score(env: Env, n: int):
     score += env.depth #g^*(n)
     for i in range(n):
         for man in env.left[i]:
-            score += 4 * man
+            score += 2 * man
     for i in range(n):
         for man in env.island[i]:
             score += 2 * man
@@ -196,6 +196,7 @@ def Astar(n = N):
     heapq.heappush(states, state)
     visited = [state] #すでに訪れたことのある状態は二度は訪れないことにする
     node_counter = 1
+    # movesに0->2, 2->0を追加することで直接移動を可能にした。
     moves: List[int, int] = [[0,1], [1,0], [2,1], [1,2], [0,2], [2,0]]
     while states:
         node = heapq.heappop(states)
@@ -229,7 +230,7 @@ N: num_nodes
 6: 10022
 """
 
-"""Result
+"""Result(4_2と同じh(n)を用いた場合)
 N: num_nodes
 1: 5
 2: 45
@@ -237,4 +238,14 @@ N: num_nodes
 4: 600
 5: 1446
 6: 11019
+"""
+
+"""Result
+N: num_nodes
+1: 5
+2: 50
+3: 172
+4: 648
+5: 1046
+6: 3582
 """

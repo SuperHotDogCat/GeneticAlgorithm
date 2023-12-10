@@ -159,6 +159,7 @@ def dfs(n = N):
     states = deque([state])
     visited = [state] #すでに訪れたことのある状態は二度は訪れないことにする
     node_counter = 1
+    # movesに0->2, 2->0を追加することで直接移動を可能にした。
     moves: List[int, int] = [[0,1], [1,0], [2,1], [1,2],[0,2],[2,0]]
     while states:
         node = states.pop() #DFSなのでpop, nodeはenv　class
