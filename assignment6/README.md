@@ -28,7 +28,7 @@ $$
 よって, 全体の評価関数は, 二次元座標$x_{i}, x_{j}$が左右対称である時に1を取るような関数を$f(x_{i}, x_{j})$とすると
 
 $$
-\sum_{i \ne j}f(x_{i}, x_{j}) + \lambda \sum_{i \ne j} \|20-\|x_{i}-x_{j}\|_{2}\|_{2}^{2}
+\sum_{i \ne j}f(x_{i}, x_{j}) - \lambda \sum_{i \ne j} \|20-\|x_{i}-x_{j}\|_{2}\|_{2}^{2}
 $$
 
 となる。ただし, $\lambda$は$\sum_{i \ne j}f(x_{i}, x_{j})$のオーダーに合わせるように設定する。今回は$\lambda = \dfrac{1}{20^2}$とした。
@@ -37,4 +37,15 @@ $$
 </p>
 
 # Result
+
+darwinを10000世代回した結果とlamarckを50世代回した結果は以下の通りである。
+lamarckの遺伝的アルゴリズムはかなり計算量が重く, 50世代で6時間もかかった
+
+### darwin
+
+<img src="points_score_darwin.png">
+
+### lamarck
+
+<img src="points_score_lamarck_7_12.png">
 
