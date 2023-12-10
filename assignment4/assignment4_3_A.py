@@ -164,16 +164,23 @@ def calc_score(env: Env, n: int):
     env.score(f値)を計算する
     スライドのf^*(n) = g^*(n) + h^*(n)を用いて計算する
 
-    h^*(n)はenv.leftに残っている人数の二倍を加算することにする(行き帰りを行うことで一人ずつ運べるため)
-    もしboatがright側にある場合は1加算する
+    h^*(n)はenv.leftに残っている人数の4倍を加算することにする(行き帰りを行うことで一人ずつ運べるため)
+    h^*(n)はenv.islandに残っている人数の2倍を加算することにする(行き帰りを行うことで一人ずつ運べるため)
+    もしboatがislandにある場合は1加算する
+    もしboatがrightにある場合は2加算する
     """
     score = 0
     score += env.depth #g^*(n)
     for i in range(n):
         for man in env.left[i]:
+            score += 4 * man
+    for i in range(n):
+        for man in env.island[i]:
             score += 2 * man
     if env.boat == 1:
         score += 1
+    if env.boat == 2:
+        score += 2
     env.score = score
 
 def Astar(n = N):
@@ -212,7 +219,7 @@ if __name__ == "__main__":
     print(Astar(5)) 
     print(Astar(6)) 
 
-"""Result
+"""Result(4_1と同じh(n)を用いた場合)
 N: num_nodes
 1: 5
 2: 45
@@ -220,4 +227,14 @@ N: num_nodes
 4: 2338
 5: 1322
 6: 10022
+"""
+
+"""Result
+N: num_nodes
+1: 5
+2: 45
+3: 250
+4: 600
+5: 1446
+6: 11019
 """
