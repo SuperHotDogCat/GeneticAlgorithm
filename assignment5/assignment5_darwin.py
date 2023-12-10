@@ -78,7 +78,7 @@ def calc_score(entity, ways, doprint = False):
     """
     entity: score
     """
-    X_s: np.ndarray = np.zeros(20).tolist()
+    X_s: List = np.zeros(20).tolist()
     score = 0
     for i, sign in enumerate(entity):
         #i番目の操作

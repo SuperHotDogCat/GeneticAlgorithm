@@ -97,6 +97,18 @@ At coder典型90のA49 - Heuristic 2のスコアを計算するための関数�
 <p>
 結果はdarwin0.png, baldwin0.png, lamarck0.pngの通りである。
 </p>
+
+### darwin
+
+<img src = "darwin0.png">
+
+### baldwin
+
+<img src = "baldwin0.png">
+
+### lamarck
+
+<img src = "lamarck0.png">
 <p>
 計算時間はdarwinが1秒未満, baldwin, lamarckはアルゴリズムがほぼ同じなので1時間程度であった。
 </p>
