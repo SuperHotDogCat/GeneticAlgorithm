@@ -2,7 +2,7 @@
 対話型進化計算を実行することとした。
 好き嫌いで1か0点
 左右対称な点が1組あるごとに点数を1点加算
-選択90% 交叉8% 突然変異2%
+コピー90% 交叉8% 突然変異2%
 
 選択法: トーナメント法(3個取り出す)
 個体数: 50とする
@@ -52,13 +52,14 @@ def crossover_test():
     idx2 = 5
     print(crossover(entity1, entity2, idx1, idx2))
 
-def exe_crossover(entities, num_entity, T):
+def exe_crossover(entities, scores, num_entity, T):
     """
     Tは操作数
     """
-    selected_entity_indices = np.random.randint(0, num_entity, 2)
+    selected_entity1 = selection(entities, scores, num_entity, 3)
+    selected_entity2 = selection(entities, scores, num_entity, 3)
     selected_indices = np.random.randint(0, T, 2)
-    entity1, entity2 = crossover(entities[selected_entity_indices[0]], entities[selected_entity_indices[1]], min(selected_indices), max(selected_indices))
+    entity1, entity2 = crossover(selected_entity1, selected_entity2, min(selected_indices), max(selected_indices))
     return entity1, entity2
 
 def mutation(entity, idx):
@@ -236,13 +237,13 @@ def main():
                 new_entity = selection(entities, scores, args.num_entity, 3)
                 new_entities.append(new_entity)
             elif 0.90 <= p < 0.98:
-                new_entity1, new_entity2 = exe_crossover(entities, args.num_entity, 2 * 6 * 23)
+                new_entity1, new_entity2 = exe_crossover(entities, scores, args.num_entity, 2 * 6 * 23)
                 new_entities.append(new_entity1)
                 new_entities.append(new_entity2)
             else:
-                selected_entity_idx = np.random.randint(0, args.num_entity)
+                selected_entity = selection(entities, scores, args.num_entity, 3)
                 selected_idx = np.random.randint(0, 2 * 6 * 23)
-                new_entity = mutation(entities[selected_entity_idx], selected_idx)
+                new_entity = mutation(selected_entity, selected_idx)
                 new_entities.append(new_entity)
         entities = new_entities
         scores = [0] * len(entities)
