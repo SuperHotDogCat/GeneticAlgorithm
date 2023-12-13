@@ -17,7 +17,7 @@ Wikipediaの実装例に従って実装を行う。
 選択確率: 94%, 交叉確率: 5%, 突然変異:1%
 
 この問題では3種類のGAを比較するのが目的なので、同じ選択法・個体数を使用して成績を比較する
-選択法: トーナメント法(5個取り出す)
+選択法: トーナメント法(3個取り出す)
 個体数: 50とする
 世代数: 100
 
@@ -38,7 +38,7 @@ def make_args():
     args = parser.parse_args()
     return args
 
-def selection(entities: List[List[int]], scores: List[int], num_entity: int, selection_n: int = 5):
+def selection(entities: List[List[int]], scores: List[int], num_entity: int, selection_n: int = 3):
     indices = list(range(num_entity))
     selected_indices = np.random.choice(indices, replace = False, size = selection_n) #復元抽出とする
     selected_scores = np.array(scores)[selected_indices]
@@ -62,8 +62,8 @@ def exe_crossover(entities, num_entity, T):
     """
     Tは操作数
     """
-    selected_entity1 = selection(entities, scores, args.num_entity, 5)
-    selected_entity2 = selection(entities, scores, args.num_entity, 5)
+    selected_entity1 = selection(entities, scores, args.num_entity, 3)
+    selected_entity2 = selection(entities, scores, args.num_entity, 3)
     selected_indices = np.random.randint(0, T, 2)
     entity1, entity2 = crossover(selected_entity1, selected_entity2, min(selected_indices), max(selected_indices))
     return entity1, entity2
@@ -162,14 +162,14 @@ if __name__ == "__main__":
         while len(new_entities) < args.num_entity:
             p = np.random.rand() #probability
             if p < 0.94:
-                new_entity = selection(entities, scores, args.num_entity, 5)
+                new_entity = selection(entities, scores, args.num_entity, 3)
                 new_entities.append(new_entity)
             elif 0.94 <= p < 0.99:
                 new_entity1, new_entity2 = exe_crossover(entities, args.num_entity, T)
                 new_entities.append(new_entity1)
                 new_entities.append(new_entity2)
             else:
-                selected_entity = selection(entities, scores, args.num_entity, 5)
+                selected_entity = selection(entities, scores, args.num_entity, 3)
                 selected_idx = np.random.randint(0, T)
                 new_entity = mutation(selected_entity, selected_idx)
                 new_entities.append(new_entity)
