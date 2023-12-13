@@ -62,9 +62,10 @@ def exe_crossover(entities, num_entity, T):
     """
     Tは操作数
     """
-    selected_entity_indices = np.random.randint(0, num_entity, 2)
+    selected_entity1 = selection(entities, scores, args.num_entity, 5)
+    selected_entity2 = selection(entities, scores, args.num_entity, 5)
     selected_indices = np.random.randint(0, T, 2)
-    entity1, entity2 = crossover(entities[selected_entity_indices[0]], entities[selected_entity_indices[1]], min(selected_indices), max(selected_indices))
+    entity1, entity2 = crossover(selected_entity1, selected_entity2, min(selected_indices), max(selected_indices))
     return entity1, entity2
 
 def mutation(entity, idx):
@@ -161,16 +162,16 @@ if __name__ == "__main__":
         while len(new_entities) < args.num_entity:
             p = np.random.rand() #probability
             if p < 0.94:
-                new_entity = selection(entities, scores, args.num_entity, 3)
+                new_entity = selection(entities, scores, args.num_entity, 5)
                 new_entities.append(new_entity)
             elif 0.94 <= p < 0.99:
                 new_entity1, new_entity2 = exe_crossover(entities, args.num_entity, T)
                 new_entities.append(new_entity1)
                 new_entities.append(new_entity2)
             else:
-                selected_entity_idx = np.random.randint(0, args.num_entity)
+                selected_entity = selection(entities, scores, args.num_entity, 5)
                 selected_idx = np.random.randint(0, T)
-                new_entity = mutation(entities[selected_entity_idx], selected_idx)
+                new_entity = mutation(selected_entity, selected_idx)
                 new_entities.append(new_entity)
         entities = new_entities
         scores = [0] * len(entities)
