@@ -154,6 +154,7 @@ if __name__ == "__main__":
     
     print(np.max(scores))
     results = []
+    eval_results = []
     for generation in tqdm(range(args.generation)):
         #generation回だけ世代を更新する
         
@@ -180,11 +181,19 @@ if __name__ == "__main__":
             #scores[idx] = calc_score(entity, ways)
             scores[idx], _ = climbing_score(entity, ways, T)
         results.append([generation + 1, np.min(scores), np.max(scores), np.mean(scores)])
+        eval_scores = [0] * len(entities)
+        for idx, entity in enumerate(entities):
+            eval_scores[idx] = calc_score(entity, ways)
+        eval_results.append([generation + 1, np.min(eval_scores), np.max(eval_scores), np.mean(eval_scores)])
     results = np.array(results)
+    eval_results = np.array(eval_results)
     plt.plot(results[:,0], results[:,1])
     plt.plot(results[:,0], results[:,2])
     plt.plot(results[:,0], results[:,3])
-    plt.legend(["min", "max", "mean"])
+    plt.plot(eval_results[:,0], eval_results[:,1])
+    plt.plot(eval_results[:,0], eval_results[:,2])
+    plt.plot(eval_results[:,0], eval_results[:,3])
+    plt.legend(["min", "max", "mean","eval_min", "eval_max", "eval_mean"])
     plt.savefig("baldwin.png")
     print(np.max(scores))
     
