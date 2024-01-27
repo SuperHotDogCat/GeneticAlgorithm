@@ -140,7 +140,7 @@ class Ant(pg.sprite.Sprite):
                 self.mode = 2
 
         elif self.mode == 2:  # Once found food, either follow own trail back to nest, or head in nest's general direction.
-            setAcolor = (0,80,0)
+            setAcolor = (0,100,0)
             if scaledown_pos != self.last_sdp and scaledown_pos[0] in range(0,self.pgSize[0]) and scaledown_pos[1] in range(0,self.pgSize[1]):
                 self.phero.img_array[scaledown_pos] += setAcolor
                 self.last_sdp = scaledown_pos

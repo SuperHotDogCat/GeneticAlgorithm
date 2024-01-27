@@ -15,6 +15,21 @@ FPS = 60                # 48-90
 VSYNC = True            # limit frame rate to refresh rate
 PRATIO = 5              # Pixel Size for Pheromone grid, 5 is best
 SHOWFPS = True          # show framerate debug
+JUDGETIME = 10
+
+#ゲーム内変数の定義(UpperCamelで行う)
+foodSearchEfficiency = 0 # (the amount of carried food)/(10 second)
+elapsedTime = 0 #ゲーム内経過時間
+carriedFood = 0 #探索された餌の数
+
+def computeFoodSearchEfficiencyByGameTime():
+    global foodSearchEfficiency, elapsedTime, carriedFood
+    if (pg.time.get_ticks()/1000 - elapsedTime) > JUDGETIME:
+        #10秒経過したら計算する
+        foodSearchEfficiency = carriedFood / JUDGETIME #効率
+        elapsedTime = pg.time.get_ticks()/1000 #現在時刻へ
+        carriedFood = 0
+        print(foodSearchEfficiency)
 
 class Ant(pg.sprite.Sprite):
     def __init__(self, drawSurf, nest, pheroLayer):
@@ -48,6 +63,7 @@ class Ant(pg.sprite.Sprite):
         self.mode = 0
 
     def update(self, dt):  # behavior
+        global carriedFood
         mid_result = left_result = right_result = [0,0,0]
         mid_GA_result = left_GA_result = right_GA_result = [0,0,0]
         randAng = randint(0,360)
@@ -110,7 +126,7 @@ class Ant(pg.sprite.Sprite):
                 self.mode = 2
 
         elif self.mode == 2:  # Once found food, either follow own trail back to nest, or head in nest's general direction.
-            setAcolor = (0,80,0) #実装方針的に, ここの色の値を上下するだけで良かった。
+            setAcolor = (0,100,0) #実装方針的に, ここの色の値を上下するだけで良かった。
             if scaledown_pos != self.last_sdp and scaledown_pos[0] in range(0,self.pgSize[0]) and scaledown_pos[1] in range(0,self.pgSize[1]):
                 self.phero.img_array[scaledown_pos] += setAcolor
                 self.last_sdp = scaledown_pos
@@ -122,6 +138,7 @@ class Ant(pg.sprite.Sprite):
                 wandrStr = .01
                 steerStr = 5
                 self.mode = 1
+                carriedFood += 1
             elif mid_result[2] > max(left_result[2], right_result[2]) and mid_isID: #and mid_result[:2] == (0,0):
                 self.desireDir += pg.Vector2(1,0).rotate(self.ang).normalize()
                 wandrStr = .1
@@ -167,6 +184,20 @@ class Ant(pg.sprite.Sprite):
         
         #Avoid search pheromone
 
+        #ここの実装がうまく言ってるかは少しわからない, もしかしたらmode = 2のときだけ無効にする必要があるかも
+        if left_GA_result[1]== 0 and left_GA_result[2] > 0: # 完全にleft_GA_result[1] < left_GA_result[2]とすると絶滅してしまうレベルで餌が届けられなくなる
+            self.desireDir += pg.Vector2(0,2).rotate(self.ang) #.normalize()
+            wandrStr = .01
+            steerStr = 5
+        elif right_GA_result[1]== 0 and right_GA_result[2] > 0:
+            self.desireDir += pg.Vector2(0,-2).rotate(self.ang) #.normalize()
+            wandrStr = .01
+            steerStr = 5
+        elif mid_GA_result[1]==0 and mid_GA_result[2] > 0:
+            self.desireDir = pg.Vector2(-2,0).rotate(self.ang) #.normalize()
+            maxSpeed = 4
+            wandrStr = .01
+            steerStr = 5
 
         randDir = pg.Vector2(cos(radians(randAng)),sin(radians(randAng)))
         self.desireDir = pg.Vector2(self.desireDir + randDir * wandrStr).normalize()
@@ -195,9 +226,9 @@ class PheroGrid():
         self.image = pg.Surface(self.surfSize).convert()
         self.img_array = np.array(pg.surfarray.array3d(self.image),dtype=float)#.astype(np.float64)
     def update(self, dt):
-        # (R, G, B)のうちBは揮発度0.2, Gは揮発度0.1とする
+        # (R, G, B)のうちBは揮発度0.2, Gは揮発度0.05とする
         self.img_array[:, :, 2] -= .2 * (60/FPS) * ((dt/10) * FPS) 
-        self.img_array[:, :, 1] -= .1 * (60/FPS) * ((dt/10) * FPS)
+        self.img_array[:, :, 1] -= .05 * (60/FPS) * ((dt/10) * FPS)
         #[self.img_array > 0] # dt might not need FPS parts
         self.img_array = self.img_array.clip(0,255)
         pg.surfarray.blit_array(self.image, self.img_array)
@@ -298,7 +329,8 @@ def main():
         workers.draw(screen)
 
         if SHOWFPS : screen.blit(font.render(str(int(clock.get_fps())), True, [0,200,0]), (8, 8))
-
+        #餌の取得効率を計算
+        computeFoodSearchEfficiencyByGameTime()
         pg.display.update()
 
 
