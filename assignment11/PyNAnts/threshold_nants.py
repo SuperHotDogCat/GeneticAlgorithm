@@ -15,13 +15,26 @@ FPS = 60                # 48-90
 VSYNC = True            # limit frame rate to refresh rate
 PRATIO = 5              # Pixel Size for Pheromone grid, 5 is best
 SHOWFPS = True          # show framerate debug
+JUDGETIME = 10
 
+#ゲーム内変数の定義(UpperCamelで行う)
+foodSearchEfficiency = 0 # (the amount of carried food)/(10 second)
+elapsedTime = 0 #ゲーム内経過時間
+carriedFood = 0 #探索された餌の数
 '''
 実装するもの
-環境全体のある秒数ごとの食べ物の探索効率に関する変数foodSearchEfficiencyを設定
-Antそれぞれに働く閾値workThresholdを設定, workThresholdがfoodSearchEfficiencyよりも大きい場合は移動を行わない。
-
+環境全体のある秒数ごとの食べ物の探索効率に関する変数FOODSEARCHEFFICIENCYを設定
+Antそれぞれに働く閾値workThresholdを設定, workThresholdがFOODSEARCHEFFICIENCYよりも小さい場合は移動を行わない。
 '''
+
+def computeFoodSearchEfficiencyByGameTime():
+    global foodSearchEfficiency, elapsedTime, carriedFood
+    if (pg.time.get_ticks()/1000 - elapsedTime) > JUDGETIME:
+        #10秒経過したら計算する
+        foodSearchEfficiency = carriedFood / JUDGETIME #効率
+        elapsedTime = pg.time.get_ticks()/1000 #現在時刻へ
+        carriedFood = 0
+        print(foodSearchEfficiency)
 
 class Ant(pg.sprite.Sprite):
     def __init__(self, drawSurf, nest, pheroLayer):
@@ -52,9 +65,11 @@ class Ant(pg.sprite.Sprite):
         self.pos = pg.Vector2(self.rect.center)
         self.vel = pg.Vector2(0,0)
         self.last_sdp = (nest[0]/10/2,nest[1]/10/2)
-        self.mode = 0
-
+        self.mode = 0 #self.mode = 0はアリが巣から出発するモードのこと
+        self.workThreshold = 2.0 * np.random.rand()
     def update(self, dt):  # behavior
+        #global変数はここで定義しておかないと怒られる
+        global carriedFood, foodSearchEfficiency
         mid_result = left_result = right_result = [0,0,0]
         mid_GA_result = left_GA_result = right_GA_result = [0,0,0]
         randAng = randint(0,360)
@@ -87,8 +102,13 @@ class Ant(pg.sprite.Sprite):
 
         if self.mode == 0 and self.pos.distance_to(self.nest) > 21:
             self.mode = 1
-
-        elif self.mode == 1:  # Look for food, or trail to food.
+        #餌を運び途中ではないかつ, self.workThreshold < foodSearchEfficiencyの時だけ, mode = 3となる仕様にする。こうしないと餌を運んでいないとみなされてしまう
+        if self.workThreshold < foodSearchEfficiency and not self.mode == 2:
+            self.mode = 3
+        elif self.workThreshold >= foodSearchEfficiency and not self.mode == 2:
+            self.mode = 1
+        #ここにモードチェンジのコードを書く。seld.mode = 3は巣の近くで待機して働かないモードとする。
+        if self.mode == 1:  # Look for food, or trail to food.
             setAcolor = (0,0,100)
             if scaledown_pos != self.last_sdp and scaledown_pos[0] in range(0,self.pgSize[0]) and scaledown_pos[1] in range(0,self.pgSize[1]):
                 self.phero.img_array[scaledown_pos] += setAcolor
@@ -123,13 +143,14 @@ class Ant(pg.sprite.Sprite):
                 self.phero.img_array[scaledown_pos] += setAcolor
                 self.last_sdp = scaledown_pos
             if self.pos.distance_to(self.nest) < 24:
-                #self.desireDir = pg.Vector2(self.lastFood - self.pos).normalize()
+                #ここで餌を運び終わった時の処理をしている。
                 self.desireDir = pg.Vector2(-1,0).rotate(self.ang).normalize()
                 self.isMyTrail[:] = False #np.full(self.pgSize, False)
                 maxSpeed = 5
                 wandrStr = .01
                 steerStr = 5
                 self.mode = 1
+                carriedFood += 1
             elif mid_result[2] > max(left_result[2], right_result[2]) and mid_isID: #and mid_result[:2] == (0,0):
                 self.desireDir += pg.Vector2(1,0).rotate(self.ang).normalize()
                 wandrStr = .1
@@ -142,6 +163,27 @@ class Ant(pg.sprite.Sprite):
             else:  # maybe first add ELSE FOLLOW OTHER TRAILS?
                 self.desireDir += pg.Vector2(self.nest - self.pos).normalize() * .08
                 wandrStr = .1   #pg.Vector2(self.desireDir + (1,0)).rotate(pg.math.Vector2.as_polar(self.nest - self.pos)[1])
+        
+        elif self.mode == 3: #サボる
+            setAcolor = (0,0,100)
+            self.phero.img_array[scaledown_pos] += setAcolor
+
+            if scaledown_pos != self.last_sdp and scaledown_pos[0] in range(0,self.pgSize[0]) and scaledown_pos[1] in range(0,self.pgSize[1]):
+                self.phero.img_array[scaledown_pos] += setAcolor
+                self.last_sdp = scaledown_pos
+            elif mid_result[2] > max(left_result[2], right_result[2]) and mid_isID: #and mid_result[:2] == (0,0):
+                self.desireDir += pg.Vector2(1,0).rotate(self.ang).normalize()
+                wandrStr = .1
+            elif left_result[2] > right_result[2] and left_isID: #and left_result[:2] == (0,0):
+                self.desireDir += pg.Vector2(1,-2).rotate(self.ang).normalize() #left (0,-1)
+                wandrStr = .1
+            elif right_result[2] > left_result[2] and right_isID: #and right_result[:2] == (0,0):
+                self.desireDir += pg.Vector2(1,2).rotate(self.ang).normalize() #right (0, 1)
+                wandrStr = .1
+            else:  # maybe first add ELSE FOLLOW OTHER TRAILS?
+                self.desireDir += pg.Vector2(self.nest - self.pos).normalize() * .08
+                wandrStr = .1   #pg.Vector2(self.desireDir + (1,0)).rotate(pg.math.Vector2.as_polar(self.nest - self.pos)[1])
+
 
         wallColor = (50,50,50)  # avoid walls of this color
         if left_GA_result == wallColor:
@@ -180,6 +222,7 @@ class Ant(pg.sprite.Sprite):
         accel = dzStrFrc if pg.Vector2(dzStrFrc).magnitude() <= steerStr else pg.Vector2(dzStrFrc.normalize() * steerStr)
         velo = self.vel + accel * dt
         self.vel = velo if pg.Vector2(velo).magnitude() <= maxSpeed else pg.Vector2(velo.normalize() * maxSpeed)
+        #self.pos += self.vel * dt if self.mode != 3 else pg.Vector2(0, 0) <-このコードを有効にするとサボるアリが見やすくなります。
         self.pos += self.vel * dt
         self.ang = degrees(atan2(self.vel[1],self.vel[0]))
         # adjusts angle of img to match heading
@@ -278,7 +321,7 @@ def main():
         dt = clock.tick(FPS) / 100
 
         pheroImg = pheroLayer.update(dt)
-        pheroLayer.img_array[170:182,0:80] = (50,50,50)  # wall
+        pheroLayer.img_array[170:182,0:80] = (50,50,50)  # wallをここで指定している。
 
         workers.update(dt)
 
@@ -300,6 +343,9 @@ def main():
         workers.draw(screen)
 
         if SHOWFPS : screen.blit(font.render(str(int(clock.get_fps())), True, [0,200,0]), (8, 8))
+
+        #餌の取得効率を計算
+        computeFoodSearchEfficiencyByGameTime()
 
         pg.display.update()
 
