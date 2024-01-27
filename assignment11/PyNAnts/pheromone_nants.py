@@ -77,7 +77,6 @@ class Ant(pg.sprite.Sprite):
         #pg.draw.circle(self.drawSurf, (200,0,200), mid_sens, 1)
         #pg.draw.circle(self.drawSurf, (200,0,200), left_sens, 1)
         #pg.draw.circle(self.drawSurf, (200,0,200), right_sens, 1)
-
         if self.mode == 0 and self.pos.distance_to(self.nest) > 21:
             self.mode = 1
 
@@ -111,7 +110,7 @@ class Ant(pg.sprite.Sprite):
                 self.mode = 2
 
         elif self.mode == 2:  # Once found food, either follow own trail back to nest, or head in nest's general direction.
-            setAcolor = (0,80,0)
+            setAcolor = (0,80,0) #実装方針的に, ここの色の値を上下するだけで良かった。
             if scaledown_pos != self.last_sdp and scaledown_pos[0] in range(0,self.pgSize[0]) and scaledown_pos[1] in range(0,self.pgSize[1]):
                 self.phero.img_array[scaledown_pos] += setAcolor
                 self.last_sdp = scaledown_pos
@@ -165,6 +164,9 @@ class Ant(pg.sprite.Sprite):
             maxSpeed = 5
             wandrStr = .01
             steerStr = 5
+        
+        #Avoid search pheromone
+
 
         randDir = pg.Vector2(cos(radians(randAng)),sin(radians(randAng)))
         self.desireDir = pg.Vector2(self.desireDir + randDir * wandrStr).normalize()
@@ -193,7 +195,10 @@ class PheroGrid():
         self.image = pg.Surface(self.surfSize).convert()
         self.img_array = np.array(pg.surfarray.array3d(self.image),dtype=float)#.astype(np.float64)
     def update(self, dt):
-        self.img_array -= .2 * (60/FPS) * ((dt/10) * FPS) #[self.img_array > 0] # dt might not need FPS parts
+        # (R, G, B)のうちBは揮発度0.2, Gは揮発度0.1とする
+        self.img_array[:, :, 2] -= .2 * (60/FPS) * ((dt/10) * FPS) 
+        self.img_array[:, :, 1] -= .1 * (60/FPS) * ((dt/10) * FPS)
+        #[self.img_array > 0] # dt might not need FPS parts
         self.img_array = self.img_array.clip(0,255)
         pg.surfarray.blit_array(self.image, self.img_array)
         return self.image

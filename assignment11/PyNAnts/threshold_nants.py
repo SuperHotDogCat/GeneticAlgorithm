@@ -25,6 +25,8 @@ carriedFood = 0 #探索された餌の数
 実装するもの
 環境全体のある秒数ごとの食べ物の探索効率に関する変数FOODSEARCHEFFICIENCYを設定
 Antそれぞれに働く閾値workThresholdを設定, workThresholdがFOODSEARCHEFFICIENCYよりも小さい場合は移動を行わない。
+
+餌が足りなかったら死んだり, 餌が多かったら増えたりとかしても良さそう
 '''
 
 def computeFoodSearchEfficiencyByGameTime():
