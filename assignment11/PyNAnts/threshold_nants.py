@@ -3,6 +3,8 @@ from math import pi, sin, cos, atan2, radians, degrees
 from random import randint
 import pygame as pg
 import numpy as np
+import matplotlib.pyplot as plt
+
 '''
 NAnts - Ant pheromone trail simulation. Surfarray version. WIP
 Copyright (c) 2021  Nikolaus Stromberg  nikorasu85@gmail.com
@@ -23,11 +25,13 @@ elapsedTime = 0 #ゲーム内経過時間
 carriedFood = 0 #探索された餌の数
 '''
 実装するもの
-環境全体のある秒数ごとの食べ物の探索効率に関する変数FOODSEARCHEFFICIENCYを設定
-Antそれぞれに働く閾値workThresholdを設定, workThresholdがFOODSEARCHEFFICIENCYよりも小さい場合は移動を行わない。
+環境全体のある秒数ごとの食べ物の探索効率に関する変数foodSearchEfficiencyを設定
+Antそれぞれに働く閾値workThresholdを設定, workThresholdがfoodSearchEfficiencyよりも小さい場合は移動を行わない。
 
 餌が足りなかったら死んだり, 餌が多かったら増えたりとかしても良さそう
 '''
+timeArray = []
+efficiencyArray = []
 
 def computeFoodSearchEfficiencyByGameTime():
     global foodSearchEfficiency, elapsedTime, carriedFood
@@ -37,6 +41,8 @@ def computeFoodSearchEfficiencyByGameTime():
         elapsedTime = pg.time.get_ticks()/1000 #現在時刻へ
         carriedFood = 0
         print(foodSearchEfficiency)
+        timeArray.append(elapsedTime)
+        efficiencyArray.append(foodSearchEfficiency)
 
 class Ant(pg.sprite.Sprite):
     def __init__(self, drawSurf, nest, pheroLayer):
@@ -68,7 +74,7 @@ class Ant(pg.sprite.Sprite):
         self.vel = pg.Vector2(0,0)
         self.last_sdp = (nest[0]/10/2,nest[1]/10/2)
         self.mode = 0 #self.mode = 0はアリが巣から出発するモードのこと
-        self.workThreshold = 2.0 * np.random.rand()
+        self.workThreshold = 5.0 * np.random.rand()
     def update(self, dt):  # behavior
         #global変数はここで定義しておかないと怒られる
         global carriedFood, foodSearchEfficiency
@@ -301,6 +307,8 @@ def main():
     while True:
         for e in pg.event.get():
             if e.type == pg.QUIT or e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE:
+                plt.plot(timeArray, efficiencyArray)
+                plt.savefig("threshold.png")
                 return
             elif e.type == pg.MOUSEBUTTONDOWN:
                 mousepos = pg.mouse.get_pos()

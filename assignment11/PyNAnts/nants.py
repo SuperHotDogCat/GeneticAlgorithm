@@ -3,6 +3,7 @@ from math import pi, sin, cos, atan2, radians, degrees
 from random import randint
 import pygame as pg
 import numpy as np
+import matplotlib.pyplot as plt
 '''
 NAnts - Ant pheromone trail simulation. Surfarray version. WIP
 Copyright (c) 2021  Nikolaus Stromberg  nikorasu85@gmail.com
@@ -15,6 +16,27 @@ FPS = 60                # 48-90
 VSYNC = True            # limit frame rate to refresh rate
 PRATIO = 5              # Pixel Size for Pheromone grid, 5 is best
 SHOWFPS = True          # show framerate debug
+
+JUDGETIME = 10
+
+#ゲーム内変数の定義(UpperCamelで行う)
+foodSearchEfficiency = 0 # (the amount of carried food)/(10 second)
+elapsedTime = 0 #ゲーム内経過時間
+carriedFood = 0 #探索された餌の数
+
+timeArray = []
+efficiencyArray = []
+
+def computeFoodSearchEfficiencyByGameTime():
+    global foodSearchEfficiency, elapsedTime, carriedFood
+    if (pg.time.get_ticks()/1000 - elapsedTime) > JUDGETIME:
+        #10秒経過したら計算する
+        foodSearchEfficiency = carriedFood / JUDGETIME #効率
+        elapsedTime = pg.time.get_ticks()/1000 #現在時刻へ
+        carriedFood = 0
+        print(foodSearchEfficiency)
+        timeArray.append(elapsedTime)
+        efficiencyArray.append(foodSearchEfficiency)
 
 class Ant(pg.sprite.Sprite):
     def __init__(self, drawSurf, nest, pheroLayer):
@@ -48,6 +70,7 @@ class Ant(pg.sprite.Sprite):
         self.mode = 0
 
     def update(self, dt):  # behavior
+        global carriedFood
         mid_result = left_result = right_result = [0,0,0]
         mid_GA_result = left_GA_result = right_GA_result = [0,0,0]
         randAng = randint(0,360)
@@ -123,6 +146,7 @@ class Ant(pg.sprite.Sprite):
                 wandrStr = .01
                 steerStr = 5
                 self.mode = 1
+                carriedFood += 1
             elif mid_result[2] > max(left_result[2], right_result[2]) and mid_isID: #and mid_result[:2] == (0,0):
                 self.desireDir += pg.Vector2(1,0).rotate(self.ang).normalize()
                 wandrStr = .1
@@ -249,6 +273,8 @@ def main():
     while True:
         for e in pg.event.get():
             if e.type == pg.QUIT or e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE:
+                plt.plot(timeArray, efficiencyArray)
+                plt.savefig("normal.png")
                 return
             elif e.type == pg.MOUSEBUTTONDOWN:
                 mousepos = pg.mouse.get_pos()
@@ -293,6 +319,8 @@ def main():
         workers.draw(screen)
 
         if SHOWFPS : screen.blit(font.render(str(int(clock.get_fps())), True, [0,200,0]), (8, 8))
+        #餌の取得効率を計算
+        computeFoodSearchEfficiencyByGameTime()
 
         pg.display.update()
 

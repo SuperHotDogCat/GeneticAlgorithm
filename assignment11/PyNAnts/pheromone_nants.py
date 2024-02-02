@@ -3,6 +3,7 @@ from math import pi, sin, cos, atan2, radians, degrees
 from random import randint
 import pygame as pg
 import numpy as np
+import matplotlib.pyplot as plt
 '''
 NAnts - Ant pheromone trail simulation. Surfarray version. WIP
 Copyright (c) 2021  Nikolaus Stromberg  nikorasu85@gmail.com
@@ -22,6 +23,9 @@ foodSearchEfficiency = 0 # (the amount of carried food)/(10 second)
 elapsedTime = 0 #ゲーム内経過時間
 carriedFood = 0 #探索された餌の数
 
+timeArray = []
+efficiencyArray = []
+
 def computeFoodSearchEfficiencyByGameTime():
     global foodSearchEfficiency, elapsedTime, carriedFood
     if (pg.time.get_ticks()/1000 - elapsedTime) > JUDGETIME:
@@ -30,6 +34,8 @@ def computeFoodSearchEfficiencyByGameTime():
         elapsedTime = pg.time.get_ticks()/1000 #現在時刻へ
         carriedFood = 0
         print(foodSearchEfficiency)
+        timeArray.append(elapsedTime)
+        efficiencyArray.append(foodSearchEfficiency)
 
 class Ant(pg.sprite.Sprite):
     def __init__(self, drawSurf, nest, pheroLayer):
@@ -185,16 +191,16 @@ class Ant(pg.sprite.Sprite):
         #Avoid search pheromone
 
         #ここの実装がうまく言ってるかは少しわからない, もしかしたらmode = 2のときだけ無効にする必要があるかも
-        if left_GA_result[1]== 0 and left_GA_result[2] > 0: # 完全にleft_GA_result[1] < left_GA_result[2]とすると絶滅してしまうレベルで餌が届けられなくなる
-            self.desireDir += pg.Vector2(0,2).rotate(self.ang) #.normalize()
+        if left_GA_result[1]== 0 and left_GA_result[2] > 0 and self.mode != 2: # 完全にleft_GA_result[1] < left_GA_result[2]とすると絶滅してしまうレベルで餌が届けられなくなる
+            self.desireDir += pg.Vector2(0,0.1).rotate(self.ang) #.normalize()
             wandrStr = .01
             steerStr = 5
-        elif right_GA_result[1]== 0 and right_GA_result[2] > 0:
-            self.desireDir += pg.Vector2(0,-2).rotate(self.ang) #.normalize()
+        elif right_GA_result[1]== 0 and right_GA_result[2] > 0 and self.mode != 2:
+            self.desireDir += pg.Vector2(0,-0.1).rotate(self.ang) #.normalize()
             wandrStr = .01
             steerStr = 5
-        elif mid_GA_result[1]==0 and mid_GA_result[2] > 0:
-            self.desireDir = pg.Vector2(-2,0).rotate(self.ang) #.normalize()
+        elif mid_GA_result[1]==0 and mid_GA_result[2] > 0 and self.mode != 2:
+            self.desireDir = pg.Vector2(-0.1,0).rotate(self.ang) #.normalize()
             maxSpeed = 4
             wandrStr = .01
             steerStr = 5
@@ -226,9 +232,9 @@ class PheroGrid():
         self.image = pg.Surface(self.surfSize).convert()
         self.img_array = np.array(pg.surfarray.array3d(self.image),dtype=float)#.astype(np.float64)
     def update(self, dt):
-        # (R, G, B)のうちBは揮発度0.2, Gは揮発度0.05とする
-        self.img_array[:, :, 2] -= .2 * (60/FPS) * ((dt/10) * FPS) 
-        self.img_array[:, :, 1] -= .05 * (60/FPS) * ((dt/10) * FPS)
+        # (R, G, B)のうちBは揮発度0.2, Gは揮発度0.1とする
+        self.img_array[:, :, 2] -= 0.2 * (60/FPS) * ((dt/10) * FPS) 
+        self.img_array[:, :, 1] -= 0.05 * (60/FPS) * ((dt/10) * FPS)
         #[self.img_array > 0] # dt might not need FPS parts
         self.img_array = self.img_array.clip(0,255)
         pg.surfarray.blit_array(self.image, self.img_array)
@@ -285,6 +291,8 @@ def main():
     while True:
         for e in pg.event.get():
             if e.type == pg.QUIT or e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE:
+                plt.plot(timeArray, efficiencyArray)
+                plt.savefig("pheromone.png")
                 return
             elif e.type == pg.MOUSEBUTTONDOWN:
                 mousepos = pg.mouse.get_pos()
