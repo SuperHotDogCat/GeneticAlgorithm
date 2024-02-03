@@ -190,7 +190,6 @@ class Ant(pg.sprite.Sprite):
         
         #Avoid search pheromone
 
-        #ここの実装がうまく言ってるかは少しわからない, もしかしたらmode = 2のときだけ無効にする必要があるかも
         if left_GA_result[1]== 0 and left_GA_result[2] > 0 and self.mode != 2: # 完全にleft_GA_result[1] < left_GA_result[2]とすると絶滅してしまうレベルで餌が届けられなくなる
             self.desireDir += pg.Vector2(0,0.1).rotate(self.ang) #.normalize()
             wandrStr = .01
@@ -232,7 +231,7 @@ class PheroGrid():
         self.image = pg.Surface(self.surfSize).convert()
         self.img_array = np.array(pg.surfarray.array3d(self.image),dtype=float)#.astype(np.float64)
     def update(self, dt):
-        # (R, G, B)のうちBは揮発度0.2, Gは揮発度0.1とする
+        # (R, G, B)のうちBは揮発度0.2, Gは揮発度0.05とする
         self.img_array[:, :, 2] -= 0.2 * (60/FPS) * ((dt/10) * FPS) 
         self.img_array[:, :, 1] -= 0.05 * (60/FPS) * ((dt/10) * FPS)
         #[self.img_array > 0] # dt might not need FPS parts
