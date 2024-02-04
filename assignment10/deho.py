@@ -1,5 +1,5 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
 class DEHO:
     def __init__(self, objective_function, max_iterations, population_size, search_space_dimension, search_space_boundaries):
         self.objective_function = objective_function
@@ -51,6 +51,7 @@ class DEHO:
             improved_solution = self.hill_climbing(solution)
             if self.objective_function(improved_solution) < self.objective_function(solution):
                 self.population[i] = improved_solution
+
     def hill_climbing(self, solution, step_size=0.1, max_iterations=10):
         current_solution = solution.copy()
         for _ in range(max_iterations):
@@ -60,6 +61,7 @@ class DEHO:
             if self.objective_function(neighbor_solution) < self.objective_function(current_solution):
                 current_solution = neighbor_solution
         return current_solution
+        
     def run(self):
         self.initialize_population()
         self.evaluate_fitness()
@@ -140,3 +142,18 @@ best_solution, best_fitness = deho.run()
 
 print("Best solution:", best_solution)
 print("Best fitness:", best_fitness)
+
+objective_functions = [objective_function, ackley_objective_function, griewank_objective_function, schwefel_objective_function, xinsheyang_objective_function]
+n = 30
+fig, ax = plt.subplots(len(objective_functions), 1, figsize=(12, 8))
+for i, objective_f in enumerate(objective_functions):
+    scores = [0] * n
+    solutions = [0] * n
+    for idx in range(n):
+        deho = DEHO(objective_f, max_iterations, population_size, search_space_dimension, search_space_boundaries)
+        best_solution, best_fitness = deho.run()
+        scores[idx] = best_fitness
+        solutions[idx] = best_solution
+    ax[i].hist(scores)
+    ax[i].legend([f"min: {np.min(scores)}, best_solution: {solutions[np.argmin(scores)]}"])
+plt.savefig("deho.png")

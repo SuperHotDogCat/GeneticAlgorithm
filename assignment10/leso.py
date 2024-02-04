@@ -45,19 +45,21 @@ initial_population = np.random.uniform(-5, 5, size=(10, 2))
 max_iterations = 1000
 max_eval_count = 1000
 
-#optimizer = LESO(objective_function, initial_population, max_iterations, max_eval_count)
-#best_solution = optimizer.optimize()
-#print("Best solution found:", best_solution)
-#print("Fitness:", objective_function(best_solution))
+optimizer = LESO(objective_function, initial_population, max_iterations, max_eval_count)
+best_solution = optimizer.optimize()
+print("Best solution found:", best_solution)
+print("Fitness:", objective_function(best_solution))
 
 n = 100
 scores = [0] * n
+solutions = [0] * n
 for idx in range(n):
     optimizer = LESO(objective_function, initial_population, max_iterations, max_eval_count)
     best_solution = optimizer.optimize()
     scores[idx] = objective_function(best_solution)
+    solutions[idx] = best_solution
 
 scores.sort()
 plt.hist(scores[:100])
-plt.legend([f"min: {np.min(scores[:100])}, best_solution: {best_solution}"])
+plt.legend([f"min: {np.min(scores[:100])}, best_solution: {solutions[np.argmin(scores[:100])]}"])
 plt.savefig("leso.png")

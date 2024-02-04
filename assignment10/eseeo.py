@@ -64,12 +64,14 @@ print("Fitness:", objective_function(best_solution))
 
 n = 100
 scores = [0] * n
+solutions = [0] * n
 for idx in range(n):
     optimizer = ESEEO(objective_function, initial_population, max_iterations, max_eval_count)
     best_solution = optimizer.optimize()
     scores[idx] = objective_function(best_solution)
+    solutions[idx] = best_solution
 
 scores.sort()
 plt.hist(scores[:100])
-plt.legend([f"min: {np.min(scores[:100])}, best_solution: {best_solution}"])
+plt.legend([f"min: {np.min(scores[:100])}, best_solution: {solutions[np.argmin(scores[:100])]}"])
 plt.savefig("eseeo.png")

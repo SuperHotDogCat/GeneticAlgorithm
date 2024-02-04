@@ -118,3 +118,17 @@ plt.legend([f"min: {np.min(scores[:100])}, best_solution: {best_solution}"])
 plt.savefig("pso.png")
 """
 
+objective_functions = [objective_function, ackley_objective_function, griewank_objective_function, schwefel_objective_function, xinsheyang_objective_function]
+n = 30
+fig, ax = plt.subplots(len(objective_functions), 1, figsize=(12, 8))
+for i, objective_f in enumerate(objective_functions):
+    scores = [0] * n
+    solutions = [0] * n
+    for idx in range(n):
+        pso = PSO(objective_f, dimension, num_particles, lower_bound, upper_bound, max_iterations, inertia_weight, cognitive_weight, social_weight)
+        best_solution, best_fitness = pso.optimize()
+        scores[idx] = best_fitness
+        solutions[idx] = best_solution
+    ax[i].hist(scores)
+    ax[i].legend([f"min: {np.min(scores)}, best_solution: {solutions[np.argmin(scores)]}"])
+plt.savefig("pso.png")

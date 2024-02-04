@@ -104,6 +104,7 @@ class DEHO:
             improved_solution = self.hill_climbing(solution)
             if self.objective_function(improved_solution) < self.objective_function(solution):
                 self.population[i] = improved_solution
+
     def hill_climbing(self, solution, step_size=0.1, max_iterations=10):
         current_solution = solution.copy()
         for _ in range(max_iterations):
@@ -113,6 +114,7 @@ class DEHO:
             if self.objective_function(neighbor_solution) < self.objective_function(current_solution):
                 current_solution = neighbor_solution
         return current_solution
+
     def run(self):
         self.initialize_population()
         self.evaluate_fitness()
@@ -157,3 +159,46 @@ pso.global_best_position = best_solution
 best_solution, best_fitness = pso.optimize()
 print("Best solution found:", best_solution)
 print("Best fitness:", best_fitness)
+
+def objective_function(x):
+    fx = x**6-6*x**4+9*x**2+x
+    return np.sum(fx)
+
+def ackley_objective_function(x):
+    t1 = 20
+    t2 = -20 * np.exp(-0.2 * np.sqrt(1.0 / len(x) * np.sum(x ** 2, axis=0)))
+    t3 = np.e
+    t4 = -np.exp(1.0 / len(x) * np.sum(np.cos(2 * np.pi * x), axis=0))
+    return t1 + t2 + t3 + t4
+
+def griewank_objective_function(x):
+    w = np.array([1.0 / np.sqrt(i + 1) for i in range(len(x))])
+    t1 = 1
+    t2 = 1.0 / 4000.0 * np.sum(x ** 2)
+    t3 = - np.prod(np.cos(x * w))
+    return t1 + t2 + t3
+
+def xinsheyang_objective_function(x):
+    t1 = np.sum( np.abs(x) )
+    e1 = - np.sum( np.sin(x ** 2) )
+    t2 = np.exp(e1)
+    return t1 * t2
+
+objective_functions = [objective_function, ackley_objective_function, griewank_objective_function, schwefel_objective_function, xinsheyang_objective_function]
+n = 30
+fig, ax = plt.subplots(len(objective_functions), 1, figsize=(12, 8))
+for i, objective_f in enumerate(objective_functions):
+    scores = [0] * n
+    solutions = [0] * n
+    for idx in range(n):
+        deho = DEHO(objective_f, max_iterations, population_size, search_space_dimension, search_space_boundaries)
+        best_solution, best_fitness = deho.run()
+        pso = PSO(objective_f, dimension, num_particles, np.min(best_solution), np.max(best_solution), max_iterations, inertia_weight, cognitive_weight, social_weight)
+        pso.global_best_fitness = best_fitness #初期best fitness
+        pso.global_best_position = best_solution #初期best solution
+        best_solution, best_fitness = pso.optimize()
+        scores[idx] = best_fitness
+        solutions[idx] = best_solution
+    ax[i].hist(scores)
+    ax[i].legend([f"min: {np.min(scores)}, best_solution: {solutions[np.argmin(scores)]}"])
+plt.savefig("merge.png")
